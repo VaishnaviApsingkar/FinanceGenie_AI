@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Bank Accounts</title>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%; /* Ensures the full height of the viewport is used */
+        }
+
+        .container1 {
+            display: flex;
+            flex-direction: column;
+            width: 100%; /* Adjust width as needed */ 
+            height: 100%;
+        }
+        .container {
+            display: flex;
+            flex-grow: 1; 
+            width: 100%; /* Adjust width as needed */ 
+            height: 90%;
+        }
+
+        .left-column {
+            flex: 1; /* 1/3 width */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            height: 90%;
+            overflow-y: auto;
+        } 
+
+        button {
+            width: 30%;
+            align-self: center;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            position: relative;
+            margin-bottom:20px;
+        }
+
+        .card button{
+            width: 30%;
+            align-self: right;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #eb2222;
+            color: white;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 0;  
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .right-column {
+            flex:2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Space between response area and prompt */
+            height: 90%; /* Full height of the column */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-left: 20px;
+        }
+
+        .ai-response-area {
+            /* flex: 1; Takes up remaining space */
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 2px solid #007bff; /* Add border with desired color */
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .ai-prompt-tab {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            align-items: center;
+            gap: 10px; /* Adds spacing between elements */
+            
+        
+        }
+
+        .attachment-symbol {
+            cursor: pointer;
+            font-size: 1.5rem; /* Adjust size as needed */
+            padding: 5px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background-color: #f9f9f9;
+            border-radius: 15px;
+        }
+           
+        #ai-prompt {
+            width: 90%; /* Make the input field cover the full width */
+            height: 100px; /* Adjust height as needed */
+            padding: 10px; /* Add padding for better appearance */
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            border: 1px solid #ccc; /* Add a border */
+            border-radius: 3px; /* Slightly rounded corners */
+        }   
+        
+
+        .ai-prompt-tab button {
+            display: flex;
+            width: 10%;
+            height: 30px; /* Button height */
+            border: none;
+            background-color: #099320;
+            color: rgb(5, 5, 5);
+            border-radius: 5px;
+            cursor: pointer;
+            align-items: center;
+            justify-content:center;
+            margin-bottom: 0;
+            
+        }
+        
+        
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            margin-bottom: 0;
+        }
+        
+    </style>
+
+    <script>
+        async function deleteAccount(accountId) {
+            const confirmDelete = confirm("Are you sure you want to delete this account and its transactions?");
+            if (!confirmDelete) return;
+
+            try {
+                const response = await fetch(`/home/api/delete_account/${accountId}`, {
+                    method: 'DELETE',
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    location.reload(); // Reload the page to update the account list
+                } else {
+                    alert(result.message || 'Error deleting account.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        async function addAccount(event) {
+            event.preventDefault();
+            const bank_name = document.getElementById('bank_name').value;
+            const account_nickname = document.getElementById('account_nickname').value;
+            const account_number = document.getElementById('account_number').value;
+            const balance = document.getElementById('balance').value;
+
+            const response = await fetch('/home/api/add_account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({bank_name, account_nickname, account_number, balance })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert('Error adding account');
+            }
+        }
+        
+        // for ai agent
+        async function processPromptAndFile(event) {
+            
+            event.preventDefault();
+
+            document.getElementById('loading').style.display = 'block';
+
+            // Get prompt and file input
+            const prompt = document.getElementById('ai-prompt').value;
+            const fileInput = document.getElementById('file-upload');
+            const file = fileInput.files[0];
+
+            // Validate input
+            if (!prompt && !file) {
+                alert("Either a prompt or a file is required.");
+                return;
+            }
+            if (file && !prompt) {
+                alert("A prompt is required when uploading a file.");
+                return;
+            }
+
+            const formData = new FormData();
+            if (prompt) formData.append('prompt', prompt);
+            if (file) formData.append('file', file);
+
+
+            try {
+                const response = await fetch('/home/api/process_file_and_add_transaction', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const responseArea = document.querySelector('.ai-response-area');
+                // const result = await response.json();
+                document.getElementById('loading').style.display = 'none'; // Hide loading indicator
+                
+                
+                // responseArea.innerText = result; // Display the plain text result
+                if (response.ok) {
+                    // Display AI response or success message
+                    // responseArea.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                    // responseArea.innerHTML = `<p>${result.summary}</p>`;
+                    const message = await response.text(); // Get plain text response
+                    responseArea.innerHTML = `<p>${message}</p>`; // Display plain text
+                    // alert(result.message || 'Transactions processed successfully!');
+                } else {
+                    const errorMessage = await response.text();
+                    responseArea.innerHTML = `<p>${errorMessage || 'An unknown error occurred.'}</p>`;
+                    // alert(result.error || 'Error processing transactions.');
+                }
+               
+            } catch (error) {
+                console.error('Error:', error);
+                const responseArea = document.querySelector('.ai-response-area');
+                document.getElementById('loading').style.display = 'none'; // Hide loading indicator on error
+                responseArea.innerHTML = `<p>An unexpected error occurred. Please try again.</p>`;
+                // alert('An error occurred. Please try again.');
+            }
+        }
+        
+        
+    </script>
+</head>
+<body>
+    <div class="container1">
+        <div class="container">
+            <div class="left-column">
+                <header>Bank Accounts</header>
+                <form onsubmit="addAccount(event)">
+                    <input type="text" id="bank_name" placeholder="Bank Name" required>
+                    <input type="text" id="account_nickname" placeholder="Account Nickname" required>
+                    <input type="text" id="account_number" placeholder="Account Number" required>
+                    <input type="number" id="balance" placeholder="Balance" required>
+                    <button type="submit">Add Account</button>
+                </form>
+                <!-- Add New Account -->
+                <!-- <div class="add-button" onclick="document.getElementById('addAccountForm').style.display='block';">+</div> -->
+                
+                <!-- Bank Accounts Section -->
+                {% for account in accounts %}
+                <div class="card">
+                    <div class="details">
+                        <strong>{{ account.bank_name }}</strong>
+                        <span>{{ account.account_nickname }}</span>
+                        <span>Account No: {{ account.account_number }}</span>
+                        <span>Balance: ${{ account.balance }}</span>
+                    </div>
+                    <!-- <button >Delete</button> -->
+                    <button class="delbutton" onclick="deleteAccount('{{ account.id }}')">Delete</button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="right-column">
+                <!-- <h2>AI Response</h2> -->
+                <div class="ai-response-area">
+                    <p> AI response</p>
+                </div>
+                <div class="ai-prompt-tab">
+                    <input id="ai-prompt" rows="5" placeholder="Enter your prompt here">
+                        <label for="file-upload" class="attachment-symbol">
+                            📎
+                        </label>
+                        <input type="file" id="file-upload" accept=".pdf,.txt,.png,.jpg,.jpeg" style="display: none;"></input>
+                    </input>
+                    <button onclick="processPromptAndFile(event)">Submit</button>
+                </div>
+                <div id="loading" style="display: none;">Processing...</div>
+            </div>
+
+            <!-- Add Account Form -->
+            <!-- <form id="addAccountForm" method="POST" action="{{ url_for('home.dashboard') }}" style="display: none;">
+                <label for="bank_name">Bank Name</label>
+                <input type="text" id="bank_name" name="bank_name" placeholder="Enter bank name" required>
+
+                <label for="account_nickname">Account Nickname</label>
+                <input type="text" id="account_nickname" name="account_nickname" placeholder="Enter account nickname" required>
+
+                <label for="account_number">Account Number</label>
+                <input type="text" id="account_number" name="account_number" placeholder="Enter account number" required>
+
+                <label for="balance">Current Balance</label>
+                <input type="number" id="balance" name="balance" placeholder="Enter balance" required>
+
+                <button type="submit">Add Account</button>
+            </form> -->
+        </div>
+    
+        <footer>&copy; 2024 Finance AI Agent- Made with &hearts; by Vaishnavi Apsingkar</footer>
+    </div>
+</body>
+</html>

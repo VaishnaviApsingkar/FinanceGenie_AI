@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Login</title>
+    <style>
+        /* html, body {
+            display: grid;
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            margin: 0;  
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        } */
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            
+        }
+
+
+        /* .container {
+            /* flex:1; 
+            display: grid;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+            height:50%;
+
+            text-align: center;
+            /* display: flex; 
+            justify-self:center ;
+            align-self: center;
+
+        } */
+
+        .container {
+            flex: 1; /* Makes the container take up all available vertical space */
+            display: grid;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            text-align: center;
+            align-self: center;
+            /* margin: auto; */
+        }
+
+        .loginarea{
+            
+            display: grid;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+            align-content: space-evenly;
+            justify-content: space-evenly;
+            justify-items: stretch;
+            align-items: center;
+            justify-self:center ;
+
+
+        }
+
+        /* .log {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        } */
+
+        header {
+            width:140%;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #f0f1f2;
+            align-self: center;
+            justify-self: center;
+        }
+        label {
+            display: block;
+            font-size: 0.9em;
+            margin: 10px 0 5px;
+            color: #333;
+            align-self: center;
+            justify-self: left;
+        }
+        input {
+            width: 120%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            align-self: center;
+            justify-self: center;
+        }
+        button {
+            width: 50%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            align-self: center;
+            justify-self: center;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+    
+
+        footer {
+            display: flex;
+            width: 100%; 
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            align-self: center;
+            justify-content: center;
+            align-content: center;
+
+        }
+    </style>
+    <script>
+        async function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('error');
+
+            // Clear previous error
+            errorDiv.textContent = '';
+
+            if (!username || !password) {
+                errorDiv.textContent = 'Username and Password are required!';
+                return;
+            }
+
+            try {
+                const response = await fetch('/auth/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    window.location.href = result.redirect_url;  // Redirect to the dashboard
+                } else {
+                    errorDiv.textContent = result.error || 'Login failed!';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="loginarea">
+            <header>FinanceGenie AI</header>
+            <form class="log" onsubmit="login(event)">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter username" required>
+                
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
+                
+                <button type="submit">Login</button>
+                <div id="error" class="error"></div>
+            </form>
+        </div>  
+    </div>
+    <footer>&copy; 2024 FinanceGenie AI- Made with &hearts; by Vaishnavi Apsingkar</footer>
+</body>
+</html>

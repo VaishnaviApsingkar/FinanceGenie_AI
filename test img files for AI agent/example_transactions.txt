@@ -1,0 +1,5 @@
+bank_id,transaction_date,amount,type,transaction_name,transaction_id
+9,2024-12-01,500.00,debit,Groceries,TXN001
+
+transaction_date,amount,type,transaction_name,transaction_id
+2024-12-14,1500.00,debit,Tour,TXN003
