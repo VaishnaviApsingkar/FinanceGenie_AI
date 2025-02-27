@@ -50,6 +50,27 @@ FinanceGenie-AI/
 
 ---
 
+## 🎯 API Endpoints  
+
+### 🔹 **Authentication**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/login` | User login |
+| `POST` | `/api/register` | Register new user |
+
+### 🔹 **Bank Account Management**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/get_accounts` | Fetch all bank accounts |
+| `POST` | `/api/add_account` | Add a new bank account |
+| `DELETE` | `/api/delete_account/<id>` | Delete an account |
+
+### 🔹 **AI-Powered Queries**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/process_file_and_add_transaction` | AI-driven transaction analysis |
+
+---
 ## 📸 Screenshots
 
 <img src="https://github.com/VaishnaviApsingkar/FinanceGenie_AI/blob/bfe313c02a1b5f1bf5271c40ea6401b4279578aa/images/img1.png" alt="FinanceGenie Dashboard" width="600" height="300">
