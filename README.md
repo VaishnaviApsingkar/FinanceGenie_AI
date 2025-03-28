@@ -11,7 +11,7 @@ Built with **Flask, SQLAlchemy, OpenAI, and OCR technologies**, it enables **sma
 ✅ **Bank Account Management** (Add, Retrieve, Delete accounts)  
 ✅ **AI-Powered Querying** (Generate SQL queries using OpenAI)  
 ✅ **OCR-based File Processing** (Extract data from PDFs & images)  
-✅ **Automated Transaction Summarization** (AI-driven insights)  
+✅ **Automated Transaction Summarization** (AI-driven insights using OpenAI GPT model)  
 
 ---
 
